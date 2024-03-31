@@ -1,0 +1,45 @@
+﻿@page
+@using Newtonsoft.Json
+@model IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+@{
+    var items = new List<ItemModel>
+    {
+        new ItemModel { ID = 1, Name = "Video card", Price = 1000.99M },
+        new ItemModel { ID = 2, Name = "CPU", Price = 200.49M },
+        new ItemModel { ID = 3, Name = "RAM", Price = 50.99M }
+    };
+}
+
+<h1>Items Table</h1>
+
+<partial name="_ItemsTable" model="items" />
+
+<h1>Погода</h1>
+
+@{
+    var apiKey = "d5a1e6b88f8cc34f5ab42abb80ede39f";
+    var location = "Kyiv";
+    var apiUrl = $"http://api.weatherstack.com/current?access_key={apiKey}&query={location}";
+
+    try
+    {
+        using (var client = new HttpClient())
+        {
+            var response = await client.GetStringAsync(apiUrl);
+            dynamic data = JsonConvert.DeserializeObject(response);
+
+            var temperature = data.current.temperature;
+            var weatherDescription = data.current.weather_descriptions[0];
+
+            <p>Погода в @location: @weatherDescription, Температура: @temperature °C</p>
+        }
+    }
+    catch (Exception ex)
+    {
+        <p>Виникла помилка: @ex.Message</p>
+    }
+}
